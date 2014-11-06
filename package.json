@@ -1,0 +1,16 @@
+{
+  "name": "hackathon",
+  "version": "0.0.1",
+  "description": "",
+  "dependencies": {
+    "gulp": "latest",
+    "gulp-sass": "latest",
+    "gulp-rework": "latest",
+    "gulp-inject": "latest",
+    "gulp-sourcemaps": "latest",
+    "run-sequence": "latest",
+    "source-map": "latest",
+    "mime": "latest",
+    "rework-visit": "latest"
+  }
+}
