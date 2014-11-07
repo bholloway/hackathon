@@ -15,7 +15,7 @@ gulp.task('default', function (done) {
 });
 
 gulp.task('css', function () {
-  gulp.src('src/*.scss')
+  return gulp.src('src/*.scss')
     .pipe(sourcemaps.init())
     .pipe(sass({
       includePaths: [ './css-lib', './node_modules' ]
@@ -29,7 +29,7 @@ gulp.task('css', function () {
 });
 
 gulp.task('inject', function() {
-  gulp.src('src/*.html')
+  return gulp.src('src/*.html')
     .pipe(gulp.dest('build'))
     .pipe(inject(gulp.src('build/*.css'), {
       relative: true
