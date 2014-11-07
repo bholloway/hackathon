@@ -11,6 +11,7 @@
     "run-sequence": "latest",
     "source-map": "latest",
     "mime": "latest",
-    "rework-visit": "latest"
+    "rework-visit": "latest",
+    "bootstrap-sass": "latest"
   }
 }

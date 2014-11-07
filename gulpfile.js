@@ -18,7 +18,7 @@ gulp.task('css', function () {
   gulp.src('src/*.scss')
     .pipe(sourcemaps.init())
     .pipe(sass({
-      includePaths: [ './css-lib' ]
+      includePaths: [ './css-lib', './node_modules' ]
     }))
     .on('data', fixSourceMaps())
     .pipe(sourcemaps.write())
@@ -53,25 +53,32 @@ function fixSourceMaps() {
 function reworkPlugin(stylesheet) {
   visit(stylesheet, function (declarations, node) {
     declarations.forEach(function (declaration) {
-      var analysis = /^(.*)url\s*\(\s*['"]([^'"]*)['"]\s*\)(.*)$/.exec(declaration.value)
-      if (analysis) {
-        var cssStart  = declaration.position.start;
-        var sassStart = sourceMap.originalPositionFor({
-          line:   cssStart.line,
-          column: cssStart.column
-        });
-        var sassDir = path.dirname(sassStart.source);
-        var urlFile = path.resolve(path.join(sassDir, analysis[2]));
-        var type    = mime.lookup(urlFile);
-        if (fs.existsSync(urlFile)) {
-          var contents = fs.readFileSync(urlFile);
-          var base64   = new Buffer(contents).toString('base64');
-          analysis[2]  = 'url(data:' + type + ';base64,' + base64 + ')';
-          declaration.value = analysis.slice(1).join('');
-        } else {
-          throw new Error('cannot find source for file "' + urlFile + '"')
-        }
-      }
+if (declaration.value.indexOf('../fonts/fontawesome-webfont.eot?#iefix&v=4.2.0') > 0) {
+  console.log('ere')
+}
+      var cssStart  = declaration.position.start;
+      var sassStart = sourceMap.originalPositionFor({
+        line:   cssStart.line,
+        column: cssStart.column
+      });
+      var sassDir = path.dirname(sassStart.source);
+      declaration.value = declaration.value
+        .split(/url\s*\(\s*['"]([^'"?#]*)(?:\?[^'"]*)?['"]\s*\)/g)
+        .map(function (token, i) {
+          if (i % 2) {
+            var split = [ sassDir, token ];
+            for (var i = 0; i < 3; i++, split.splice(1, 0, '..')) {
+              var urlFile = path.resolve(path.join.apply(path, split));
+              if (fs.existsSync(urlFile)) {
+                var type = mime.lookup(urlFile);
+                var contents = fs.readFileSync(urlFile);
+                var base64 = new Buffer(contents).toString('base64');
+                return 'url(data:' + type + ';base64,' + base64 + ')';
+              }
+            }
+          }
+          return token;
+        }).join('');
     });
   });
 }

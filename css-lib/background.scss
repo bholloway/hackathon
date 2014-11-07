@@ -1,7 +1,5 @@
-body {
-  background: url('background.jpeg') center no-repeat;
-}
-
-body {
-  background-color: #CCCCCC;
+@mixin kitten() {
+  background: url('background.jpeg') no-repeat;
+  background-size: 100% auto;
+  background-position: 0 50%;
 }
