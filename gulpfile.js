@@ -51,28 +51,34 @@ function fixSourceMaps() {
 }
 
 function reworkPlugin(stylesheet) {
+
+  // visit each node (selector) in the stylesheet recursively using the official utility method
   visit(stylesheet, function (declarations, node) {
+
+    // each node may have multiple declarations
     declarations.forEach(function (declaration) {
-if (declaration.value.indexOf('../fonts/fontawesome-webfont.eot?#iefix&v=4.2.0') > 0) {
-  console.log('ere')
-}
+
+      // reverse the original source-map to find the original sass file
       var cssStart  = declaration.position.start;
       var sassStart = sourceMap.originalPositionFor({
         line:   cssStart.line,
         column: cssStart.column
       });
       var sassDir = path.dirname(sassStart.source);
+
+      // allow multiple url() values in the declaration
+      //  the url will be every second value (i % 2)
       declaration.value = declaration.value
         .split(/url\s*\(\s*['"]([^'"?#]*)(?:\?[^'"]*)?['"]\s*\)/g)
         .map(function (token, i) {
           if (i % 2) {
             var split = [ sassDir, token ];
-            for (var i = 0; i < 3; i++, split.splice(1, 0, '..')) {
+            for (var i = 0; i < 3; i++, split.splice(1, 0, '..')) {   // hack to look up to 2 directories further up
               var urlFile = path.resolve(path.join.apply(path, split));
               if (fs.existsSync(urlFile)) {
-                var type = mime.lookup(urlFile);
+                var type     = mime.lookup(urlFile);
                 var contents = fs.readFileSync(urlFile);
-                var base64 = new Buffer(contents).toString('base64');
+                var base64   = new Buffer(contents).toString('base64');
                 return 'url(data:' + type + ';base64,' + base64 + ')';
               }
             }
